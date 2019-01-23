@@ -11,4 +11,4 @@ define("APP_ROOT",dirname(__FILE__));
 require "./seal/base.php";
 require "common.php";
 
-new \seal\Seal();
+\seal\Seal::getInstance()->setConfig(\seal\Config::getInstance()->get('app'))->run();

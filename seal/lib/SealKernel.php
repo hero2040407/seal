@@ -8,11 +8,13 @@
 
 namespace seal;
 
+use Swoole\Http\Response;
 
 class SealKernel
 {
     //实例
     private static $instance;
+    private static $map;
 
     //防止被一些讨厌的小伙伴不停的实例化，自己玩。
     private function __construct()
@@ -28,11 +30,45 @@ class SealKernel
         return self::$instance;
     }
 
-    public function http($request, $response)
+//    public function http($request, $response)
+//    {
+//        $req = Request::getInstance();
+//        $res = Router::getInstance()->http($request->server['request_uri']);
+//        $req->set($request);
+//        $response->end(var_export(Config::getInstance()->get('router.rules', true), TRUE));
+//    }
+
+    public function http($server,\Swoole\Http\Request $request,Response $response)
     {
+        if ($request->server['request_uri'] == '/favicon.ico') return;
         $req = Request::getInstance();
-        $res = Router::getInstance()->http($request->server['request_uri']);
         $req->set($request);
-        $response->end(var_export (Config::getInstance()->get('router.rules', true),TRUE));
+        $router = Router::getInstance()->http($req->server['request_uri']);
+
+        $app_namespace = Config::getInstance()->get('app.namespace');
+        $module = $router['module'];
+        $controller = ucfirst($router['controller']);
+        $action = $router['action'];
+        $param = $router['param'];
+        $classname = "\\{$app_namespace}\\{$module}\\{$controller}";
+
+        if (!isset(self::$map[$classname])) {
+            $class = new $classname;
+            self::$map[$classname] = $class;
+        }
+        try {
+            //测试效果
+            if (!empty(ob_get_contents())) ob_end_clean();
+            ob_start();
+            self::$map[$classname]->$action($req);
+            $content = ob_get_contents();
+            ob_end_clean();
+            $response->end($content);
+        } catch (\Exception $e) {      //在此处返回 404错误的原因是因为加载器已经在查找不到文件时有说错误说明
+            $response->header('Content-type', "text/html;charset=utf-8;");
+            $response->status(404);
+            $response->end('404 NOT FOUND');
+            return;
+        }
     }
 }

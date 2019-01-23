@@ -16,9 +16,9 @@ class Router
     private static $instance;
     //默认配置
     private static $config = [
-        'm' => 'index',     //默认模块
-        'c' => 'index',     //默认控制器
-        'a' => 'init',     //默认操作
+        'module' => 'index',     //默认模块
+        'controller' => 'index',     //默认控制器
+        'action' => 'init',     //默认操作
         'ext' => '.html',          //url后缀    例如 .html
         'rules' => [           //自定义路由
             'user' => 'user/index/init',
@@ -49,9 +49,9 @@ class Router
     public function http($request_uri)
     {
         $param = [];
-        $module = self::$config['m'];
-        $controller = self::$config['c'];
-        $action = self::$config['a'];
+        $module = self::$config['module'];
+        $controller = self::$config['controller'];
+        $action = self::$config['action'];
 
         if (empty($request_uri)) {
             return ['m' => $module, 'c' => $controller, 'a' => $action, 'p' => $param];
@@ -87,6 +87,37 @@ class Router
                 $params[$value] = $param[$key + 1];
             }
         }
-        return ['m' => $module, 'c' => $controller, 'a' => $action, 'p' => $params];
+        return ['module' => $module, 'controller' => $controller, 'action' => $action, 'param' => $params];
+    }
+
+    /**
+     * WebSocket 路由解析
+     */
+    public function websocket($data)
+    {
+        $data = json_decode($data, true);
+        if (empty($data)) {
+            echo 'WEBSOCKET-json解包错误', PHP_EOL;
+            return ['m' => NULL, 'c' => NULL, 'a' => NULL, 'p' => NULL];
+        }
+
+        $path = empty($data['cmd']) ? '' : trim($data['cmd'], '/');
+
+        if (empty($path)) {
+            echo '请求地址错误', PHP_EOL;
+            return ['m' => NULL, 'c' => NULL, 'a' => NULL, 'p' => NULL];
+        }
+
+        if (!empty(self::$config['rules']) && isset(self::$config['rules'][$path])) {
+            $path = self::$config['rules'][$path];
+        }
+
+        $param = explode("/", $path);
+
+        $module = array_shift($param);
+        $controller = array_shift($param);
+        $action = array_shift($param);
+        unset($data['cmd']);
+        return ['m' => $module, 'c' => $controller, 'a' => $action, 'p' => $data];
     }
 }

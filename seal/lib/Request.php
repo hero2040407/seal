@@ -50,11 +50,15 @@ class Request
         $this->tmpfiles = $request->tmpfiles;
         $this->request = $request->request;
         $this->cookie = $request->cookie;
-        $this->get = $request->get;
+        $this->get = $request->get ?? [];
         $this->files = $request->files;
-        $this->post = $request->post;
+        $this->post = $request->post ?? [];
         $this->rawContent = $request->rawContent();
         $this->getData = $request->getData();
+        $param = array_merge($this->get, $this->post);
+        foreach ($param as $key => $value) {
+            $this->$key = $value;
+        }
     }
     /*
     // 以上变身方法也可以用魔术方法，我写了，可就是不想用它。
@@ -67,4 +71,9 @@ class Request
     {
         return $this->$name;
     }
+
+//    public function __set($name, $value)
+//    {
+//        $this->$name = $value;
+//    }
 }
