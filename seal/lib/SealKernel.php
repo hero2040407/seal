@@ -38,7 +38,7 @@ class SealKernel
 //        $response->end(var_export(Config::getInstance()->get('router.rules', true), TRUE));
 //    }
 
-    public function http($server,\Swoole\Http\Request $request,Response $response)
+    public function http($server, \Swoole\Http\Request $request, Response $response)
     {
         if ($request->server['request_uri'] == '/favicon.ico') return;
         $req = Request::getInstance();
@@ -68,6 +68,39 @@ class SealKernel
             $response->header('Content-type', "text/html;charset=utf-8;");
             $response->status(404);
             $response->end('404 NOT FOUND');
+            return;
+        }
+    }
+
+    public function websocket($server, $frame)
+    {
+        $router = Router::getInstance()->websocket($frame->data);
+
+        $app_namespace = Config::getInstance()->get('app.namespace');
+        $module = $router['m'];
+        $controller = ucfirst($router['c']);
+        $action = $router['a'];
+        $param = $router['p'];
+
+        $classname = "\\{$app_namespace}\\{$module}\\{$controller}";
+
+        if (!isset(self::$map[$classname])) {
+            try {
+                $class = new $classname;
+                self::$map[$classname] = $class;
+            } catch (\Exception $e) {
+                echo $e->getMessage(), PHP_EOL;
+                return;
+            }
+        }
+        try {
+            self::$map[$classname]->server = $server;
+            self::$map[$classname]->fd = $frame->fd;
+            self::$map[$classname]->param = $param;
+            self::$map[$classname]->task = Task::getInstance()->setServer($server);
+            self::$map[$classname]->$action();
+        } catch (\Exception $e) {
+            echo $e->getMessage(), PHP_EOL;
             return;
         }
     }

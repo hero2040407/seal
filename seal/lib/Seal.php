@@ -93,11 +93,12 @@ class Seal
 
     public function onMessage(websocket $ws, $frame)
     {
-        echo "Message: {$frame->data}\n";
-        var_dump($frame->data);
-        $push = Push::getInstance($ws);
-        $push->send($frame);
-        $push->getAllClient();
+//        echo "Message: {$frame->data}\n";
+//        var_dump($frame->data);
+//        $push = Push::getInstance($ws);
+//        $push->send($frame);
+//        $push->getAllClient();
+        SealKernel::getInstance()->websocket($ws, $frame);
     }
 
     public function onClose($ws, $fd)
