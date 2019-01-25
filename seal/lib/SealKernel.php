@@ -8,6 +8,7 @@
 
 namespace seal;
 
+use mysql_xdevapi\Exception;
 use Swoole\Http\Response;
 
 class SealKernel
@@ -40,23 +41,24 @@ class SealKernel
 
     public function http($server, \Swoole\Http\Request $request, Response $response)
     {
-        if ($request->server['request_uri'] == '/favicon.ico') return;
-        $req = Request::getInstance();
-        $req->set($request);
-        $router = Router::getInstance()->http($req->server['request_uri']);
-
-        $app_namespace = Config::getInstance()->get('app.namespace');
-        $module = $router['module'];
-        $controller = ucfirst($router['controller']);
-        $action = $router['action'];
-        $param = $router['param'];
-        $classname = "\\{$app_namespace}\\{$module}\\{$controller}";
-
-        if (!isset(self::$map[$classname])) {
-            $class = new $classname;
-            self::$map[$classname] = $class;
-        }
         try {
+            if ($request->server['request_uri'] == '/favicon.ico') return;
+            $req = Request::getInstance();
+            $req->set($request);
+            $router = Router::getInstance()->http($req->server['request_uri']);
+
+            $app_namespace = Config::getInstance()->get('app.namespace');
+            $module = $router['module'];
+            $controller = ucfirst($router['controller']);
+            $action = $router['action'];
+            $param = $router['param'];
+            $classname = "\\{$app_namespace}\\{$module}\\{$controller}";
+
+            if (!isset(self::$map[$classname])) {
+                $class = new $classname;
+                self::$map[$classname] = $class;
+            }
+
             //测试效果
             if (!empty(ob_get_contents())) ob_end_clean();
             ob_start();
@@ -89,6 +91,7 @@ class SealKernel
                 $class = new $classname;
                 self::$map[$classname] = $class;
             } catch (\Exception $e) {
+//                ExceptionHandle::getInstance()->handle($e);
                 echo $e->getMessage(), PHP_EOL;
                 return;
             }
@@ -100,6 +103,7 @@ class SealKernel
             self::$map[$classname]->task = Task::getInstance()->setServer($server);
             self::$map[$classname]->$action();
         } catch (\Exception $e) {
+//            ExceptionHandle::getInstance()->handle($e);
             echo $e->getMessage(), PHP_EOL;
             return;
         }

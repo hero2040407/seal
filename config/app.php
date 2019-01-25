@@ -24,4 +24,13 @@ return [
         'max_request' => 10000,
         'task_worker_num' => 4,
     ],
+
+    'log' => [
+        //输出到屏幕，当 set.daemonize = false 时，该配置生效，
+        'echo'  => 0 ,
+        // 日志保存目录
+        'path'  => LOG_PATH,
+        // 日志记录级别，共8个级别
+        'level' => ['EMERGENCY','ALERT','CRITICAL','ERROR','WARNING','NOTICE','INFO','DEBUG','SQL'] ,
+    ],
 ];

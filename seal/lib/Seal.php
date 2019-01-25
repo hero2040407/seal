@@ -68,7 +68,7 @@ class Seal
         $this->ser->set($this->config['set']);
 
         $this->ser->on('start', [$this, 'start']);
-//        $this->ser->on('WorkerStart', [$this, 'onWorkerStart']);
+        $this->ser->on('WorkerStart', [$this, 'onWorkerStart']);
         if ($this->config['server'] == 'websocket') {
             $this->ser->on('open', [$this, 'open']);
             $this->ser->on('message', [$this, 'onMessage']);
@@ -108,6 +108,13 @@ class Seal
         echo "client-{$fd} is closed\n";
     }
 
+    public function onWorkerStart()
+    {
+        swoole_timer_tick(3000,function ($time_id){
+            Log::getInstance()->save();
+        });
+    }
+    
     public function onTask(websocket $ws, $task_id, $from_id, $data)
     {
         return Task::getInstance()->setServer($ws)->dispatch($task_id, $from_id, $data);
@@ -120,7 +127,7 @@ class Seal
 
     public function onFinish($ws, $task_id, $data)
     {
-        Task::getInstance()->setServer($ws)->finsh($task_id, $data);
+        Task::getInstance()->setServer($ws)->finish($task_id, $data);
     }
 //监听WebSocket连接关闭事件
 }

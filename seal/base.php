@@ -9,6 +9,8 @@
 //定义框架路径
 define('SEAL_PATH', __DIR__ . '/');
 define('CONFIG_PATH', dirname(__DIR__) . '/config/');
+define('LOG_PATH',dirname (__DIR__).'/logs/');
+
 //引入加载器文件
 require_once SEAL_PATH . "lib/Loader.php";
 require_once SEAL_PATH . "lib/Config.php";
@@ -16,3 +18,4 @@ require_once SEAL_PATH . "lib/Config.php";
 $config = \seal\Config::getInstance();
 \seal\Loader::addNamespace($config->get('app.namespace'), $config->get('app.path'));
 \seal\Loader::register();
+\seal\Error::register();
