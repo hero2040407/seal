@@ -7,6 +7,7 @@
  */
 namespace app\admin;
 
+use seal\Push;
 use seal\Request;
 
 class Index
@@ -29,5 +30,12 @@ class Index
     {
 //        Log::getInstance()->write('INFO', 'hello');
         throw new \Exception('test');
+    }
+
+    public function sendToSingle(Request $request)
+    {
+        $fd = Push::getInstance()->get($request->uid);
+        $content = "FD:{$fd['fd']};say:{$this->param['msg']}";
+        $this->task->delivery(\app\task\Notice::class,'toSingle',[$fd['fd'], $content]);
     }
 }

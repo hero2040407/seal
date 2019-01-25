@@ -13,7 +13,7 @@ class Notice
      *
      * @return bool
      */
-    public function ToAll($fd, $data)
+    public function toAll($fd, $data)
     {
         $fds = [];
         foreach ($this->server->connections as $client_fd) {
@@ -23,5 +23,23 @@ class Notice
             }
         }
         return "已向[" . join(",", $fds) . "]发送通知内容：" . $data;
+    }
+
+    public function toSeveral($data)
+    {
+        $fds = [];
+        foreach ($this->server->connections as $client_fd) {
+            if ($this->server->exist($client_fd)) {
+                $this->server->push($client_fd, $data);
+                $fds[] = $client_fd;
+            }
+        }
+        return "已向[" . join(",", $fds) . "]发送通知内容：" . $data;
+    }
+
+    public function toSingle($client_fd, $data)
+    {
+        $this->server->push($client_fd, $data);
+        return "已向[" . join(",", $client_fd) . "]发送通知内容：" . $data;
     }
 }

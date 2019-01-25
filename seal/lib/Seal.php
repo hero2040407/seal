@@ -61,6 +61,7 @@ class Seal
 
     public function run()
     {
+        Push::getInstance();
         $swoole_server = isset($this->config['server']) && $this->config['server'] == 'websocket' ? 'swoole_websocket_server' : 'swoole_http_server';
 
         $this->ser = new $swoole_server($this->config['ip'], $this->config['port']);
@@ -85,9 +86,11 @@ class Seal
 
     public function open(websocket $ws, $request)
     {
-        $push = Push::getInstance($ws);
-        $push->addClient($request->fd, $request->get['uid']);
-        var_dump($request->fd, $request->get, $request->server);
+        $model = Push::getInstance();
+        $model->set($request->get['uid'], ['fd' => $request->fd]);
+//        $ws->bind($request->get['uid'], $request->fd);
+//        $push->addClient($request->fd, $request->get['uid']);
+//        var_dump($request->fd, $request->get, $request->server);
         $ws->push($request->fd, "hello, welcome\n");
     }
 
@@ -101,10 +104,10 @@ class Seal
         SealKernel::getInstance()->websocket($ws, $frame);
     }
 
-    public function onClose($ws, $fd)
+    public function onClose(websocket $ws, $fd)
     {
-        $push = Push::getInstance($ws);
-        $push->deleteClient($fd);
+        Push::getInstance()->deleteClient($fd);
+//        var_dump(Push::getList());
         echo "client-{$fd} is closed\n";
     }
 

@@ -59,13 +59,16 @@ class SealKernel
                 self::$map[$classname] = $class;
             }
 
+            self::$map[$classname]->server = $server;
+            self::$map[$classname]->task = Task::getInstance()->setServer($server);
+
             //测试效果
             if (!empty(ob_get_contents())) ob_end_clean();
             ob_start();
             self::$map[$classname]->$action($req);
             $content = ob_get_contents();
             ob_end_clean();
-            $response->end($content);
+            $response->end(json_encode($content));
         } catch (\Exception $e) {      //在此处返回 404错误的原因是因为加载器已经在查找不到文件时有说错误说明
             $response->header('Content-type', "text/html;charset=utf-8;");
             $response->status(404);

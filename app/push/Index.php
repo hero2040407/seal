@@ -7,6 +7,8 @@
  */
 namespace app\push;
 
+use seal\Request;
+
 class Index
 {
 //    public function get(){
