@@ -8,7 +8,7 @@
 
 namespace seal;
 
-use mysql_xdevapi\Exception;
+use seal\exception\BaseException;
 use Swoole\Http\Response;
 
 class SealKernel
@@ -63,17 +63,24 @@ class SealKernel
             self::$map[$classname]->task = Task::getInstance()->setServer($server);
 
             //测试效果
-            if (!empty(ob_get_contents())) ob_end_clean();
-            ob_start();
-            self::$map[$classname]->$action($req);
-            $content = ob_get_contents();
-            ob_end_clean();
-            $response->end(json_encode($content));
+            $content = self::$map[$classname]->$action($req);
+            $response->header('Content-type','application/json');
+            $response->end(json_encode($content, true));
         } catch (\Exception $e) {      //在此处返回 404错误的原因是因为加载器已经在查找不到文件时有说错误说明
-            $response->header('Content-type', "text/html;charset=utf-8;");
-            $response->status(404);
-            $response->end('404 NOT FOUND');
-            return;
+                if ($e instanceof BaseException) {
+                    $content = [
+                        'code' => $e->errorCode,
+                        'msg' => $e->message,
+                    ];
+                    $response->header('Content-type','application/json');
+                    $response->end(json_encode($content, true));
+                    return;
+                }
+                Log::getInstance()->write('ERROR', $e->getFile(), $e->getLine(), $e->getMessage());
+                $response->header('Content-type', "text/html;charset=utf-8;");
+                $response->status(404);
+                $response->end('404 NOT FOUND');
+                return;
         }
     }
 

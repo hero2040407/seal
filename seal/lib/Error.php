@@ -7,9 +7,6 @@
  */
 namespace seal;
 
-use seal\exception\ErrorException;
-use seal\exception\ThrowableError;
-
 
 class Error
 {
@@ -39,18 +36,8 @@ class Error
      */
     public static function appException($e)
     {
-        if (!$e instanceof \Exception) {
-            $e = new ThrowableError($e);
-        }
         Log::getInstance()->write('ERROR', $e->getMessage() . "\r\n",
             $e->getFile(), $e->getLine());
-//        self::getExceptionHandler()->report($e);
-//
-//        if (PHP_SAPI == 'cli') {
-//            self::getExceptionHandler()->renderForConsole(new ConsoleOutput, $e);
-//        } else {
-//            self::getExceptionHandler()->render($e)->send();
-//        }
     }
 
     /**
@@ -60,11 +47,11 @@ class Error
      * @param  integer $errstr  详细错误信息
      * @param  string  $errfile 出错的文件
      * @param  integer $errline 出错行号
-     * @throws ErrorException
+     * @throws \ErrorException
      */
     public static function appError($errno, $errstr, $errfile = '', $errline = 0)
     {
-        $exception = new ErrorException($errno, $errstr, $errfile, $errline);
+        $exception = new \ErrorException($errno, $errstr, $errfile, $errline);
         if (error_reporting() & $errno) {
             // 将错误信息托管至 think\exception\ErrorException
             throw $exception;

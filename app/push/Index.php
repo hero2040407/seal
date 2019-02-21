@@ -7,8 +7,6 @@
  */
 namespace app\push;
 
-use seal\Request;
-
 class Index
 {
 //    public function get(){
@@ -18,5 +16,11 @@ class Index
     public function get(){
         $content = "FD:{$this->fd};say:{$this->param['msg']}";
         $this->task->delivery(\app\task\Notice::class,'ToAll',[$this->fd,$content]);
+    }
+
+    public function hello()
+    {
+        $content = "FD:{$this->fd};say:{$this->param['msg']}";
+        $this->server->push($this->fd, $content);
     }
 }

@@ -9,7 +9,7 @@
 return [
     'module' => 'admin',     //默认模块
     'controller' => 'Index',     //默认控制器
-    'action' => 'init',     //默认操作
+    'action' => 'index',     //默认操作
     'ext' => '.html',          //url后缀    例如 .html
     'rules' => [           //自定义路由
         'user' => 'uesr/index/init',
