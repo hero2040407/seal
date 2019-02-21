@@ -81,6 +81,12 @@ class SealKernel
                 $response->status(404);
                 $response->end('404 NOT FOUND');
                 return;
+        } catch (\Throwable $e) {
+                Log::getInstance()->write('ERROR', $e->getFile(), $e->getLine(), $e->getMessage());
+                $response->header('Content-type', "text/html;charset=utf-8;");
+                $response->status(404);
+                $response->end('404 NOT FOUND');
+                return;
         }
     }
 

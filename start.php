@@ -10,5 +10,6 @@ define("APP_ROOT",dirname(__FILE__));
 
 require "./seal/base.php";
 require "common.php";
+require 'vendor/autoload.php';
 
 \seal\Seal::getInstance()->setConfig(\seal\Config::getInstance()->get('app'))->run();

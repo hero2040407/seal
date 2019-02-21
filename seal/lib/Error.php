@@ -23,10 +23,10 @@ class Error
      */
     public static function register()
     {
-//        error_reporting(E_ALL);
+        error_reporting(E_ALL);
         set_error_handler([__CLASS__, 'appError']);
         set_exception_handler([__CLASS__, 'appException']);
-//        register_shutdown_function([__CLASS__, 'appShutdown']);
+        register_shutdown_function([__CLASS__, 'appShutdown']);
     }
 
     /**
@@ -53,11 +53,11 @@ class Error
     {
         $exception = new \ErrorException($errno, $errstr, $errfile, $errline);
         if (error_reporting() & $errno) {
+            Log::getInstance()->write('ERROR', $exception->getMessage() . "\r\n",
+                $exception->getFile(), $exception->getLine());
             // 将错误信息托管至 think\exception\ErrorException
             throw $exception;
         }
-        Log::getInstance()->write('ERROR', $exception->getMessage() . "\r\n",
-            $exception->getFile(), $exception->getLine());
     }
 
     /**
@@ -70,6 +70,24 @@ class Error
     protected static function isFatal($type)
     {
         return in_array($type, [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE]);
+    }
+
+    /**
+     * Shutdown Handler
+     * @access public
+     */
+    public static function appShutdown()
+    {
+        if (!is_null($error = error_get_last()) && self::isFatal($error['type'])) {
+            // 将错误信息托管至think\ErrorException
+            $exception = new \ErrorException($error['type'], $error['message'], $error['file'], $error['line']);
+
+            self::appException($exception);
+        }
+
+        // 写入日志
+        Log::getInstance()->write('ERROR', $exception->getMessage() . "\r\n",
+            $exception->getFile(), $exception->getLine());
     }
 
     /**

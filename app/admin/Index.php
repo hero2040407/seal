@@ -7,7 +7,7 @@
  */
 namespace app\admin;
 
-use seal\exception\ResultException;
+use app\admin\model\Idea;
 use seal\Push;
 use seal\Request;
 
@@ -42,7 +42,8 @@ class Index
     public function log()
     {
 //        Log::getInstance()->write('INFO', 'hello');
-        throw new ResultException();
+        throw new \Exception('catch me');
+//        trigger_error('A custom error has been triggered');
     }
 
     public function sendToSingle(Request $request)
@@ -52,8 +53,13 @@ class Index
         $this->task->delivery(\app\task\Notice::class,'toSingle',[$fd['fd'], $content]);
     }
 
+    /**
+     * @param Idea $idea
+     * @return array|\PDOStatement|string|\think\Collection
+     * @throws
+     */
     public function index()
     {
-//        return  date('Y-m-d H:i:s') . '<br/>';
+        return (new Idea())->select();
     }
 }
