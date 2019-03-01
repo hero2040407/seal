@@ -11,7 +11,7 @@ namespace seal;
 use seal\exception\BaseException;
 use Swoole\Http\Response;
 
-class SealKernel
+class Kernel
 {
     //实例
     private static $instance;
@@ -63,30 +63,30 @@ class SealKernel
             self::$map[$classname]->task = Task::getInstance()->setServer($server);
 
             //测试效果
-            $content = self::$map[$classname]->$action($req);
-            $response->header('Content-type','application/json');
+            $content = self::exec($classname, $action);
+            $response->header('Content-type', 'application/json');
             $response->end(json_encode($content, true));
         } catch (\Exception $e) {      //在此处返回 404错误的原因是因为加载器已经在查找不到文件时有说错误说明
-                if ($e instanceof BaseException) {
-                    $content = [
-                        'code' => $e->errorCode,
-                        'msg' => $e->message,
-                    ];
-                    $response->header('Content-type','application/json');
-                    $response->end(json_encode($content, true));
-                    return;
-                }
-                Log::getInstance()->write('ERROR', $e->getFile(), $e->getLine(), $e->getMessage());
-                $response->header('Content-type', "text/html;charset=utf-8;");
-                $response->status(404);
-                $response->end('404 NOT FOUND');
+            if ($e instanceof BaseException) {
+                $content = [
+                    'code' => $e->errorCode,
+                    'msg' => $e->message,
+                ];
+                $response->header('Content-type', 'application/json');
+                $response->end(json_encode($content, true));
                 return;
+            }
+            Log::getInstance()->write('ERROR', $e->getFile(), $e->getLine(), $e->getMessage());
+            $response->header('Content-type', "text/html;charset=utf-8;");
+            $response->status(404);
+            $response->end('404 NOT FOUND');
+            return;
         } catch (\Throwable $e) {
-                Log::getInstance()->write('ERROR', $e->getFile(), $e->getLine(), $e->getMessage());
-                $response->header('Content-type', "text/html;charset=utf-8;");
-                $response->status(404);
-                $response->end('404 NOT FOUND');
-                return;
+            Log::getInstance()->write('ERROR', $e->getFile(), $e->getLine(), $e->getMessage());
+            $response->header('Content-type', "text/html;charset=utf-8;");
+            $response->status(404);
+            $response->end('404 NOT FOUND');
+            return;
         }
     }
 
@@ -123,5 +123,51 @@ class SealKernel
             echo $e->getMessage(), PHP_EOL;
             return;
         }
+    }
+
+    //执行反射类方法。
+
+    /**
+     * @param $class
+     * @param $methodname
+     * @throws
+     */
+    public static function exec($class, $method_name)
+    {
+        //注入的实质是通过php的反射类 来执行被注入类的行为
+        //通过反射 可以得到类的一些信息 主要包括方法 属性
+        //通过注入 我们可以实现类对方法和构造方法的依赖。下面我举例说明
+        //1.先肯定是从一个类的构造函数开始。
+        //2.利用反射得到这个类的构造函数 在执行
+        $reflect = new \ReflectionClass($class);
+        $constructor = $reflect->getConstructor();
+        $p1 = $constructor != null ? self::getParamValue($constructor) : [];
+            //执行被反射类的构造函数 实现构造函数的依赖注入
+
+        $instance = $reflect->newInstanceArgs($p1);
+
+        //执行注入类的方法。
+        $reflect = new \ReflectionMethod($class, $method_name);
+        $p2 = self::getParamValue($reflect);
+        //执行方法注入。
+        return $reflect->invokeArgs($instance, $p2);
+    }
+
+    //这个类用来 反射出当前注入类所在的参数。
+    private static function getParamValue($reflect, $avgs = [])
+    {
+        if ($reflect->getNumberOfParameters() > 0) {
+            foreach ($reflect->getParameters() as $param) {
+                $param_type = $param->getClass();//获取当前注入对象的类型提示
+                $param_value = $param->getName();//获取参数名称
+                if ($param_type) {
+                    //表示是对象类型的参数
+                    $avgs[] = $param_type->name::getInstance();
+                } else {
+                    $avgs[] = $param_value;
+                }
+            }
+        }
+        return $avgs;
     }
 }

@@ -15,26 +15,11 @@ use \think\Db;
 class Seal
 {
     private $ser;
-
     private $config = array();
     private static $instance;
 
-//    public function __construct()
-//    {
-//        $this->ser = new websocket("0.0.0.0", 9501);
-//        $this->ser->set(array('task_worker_num' => 4));
-//        $this->ser->on('start', [$this, 'start']);
-//        $this->ser->on('open', [$this, 'open']);
-//        $this->ser->on('message', [$this, 'onMessage']);
-//        $this->ser->on('close', [$this, 'onClose']);
-//        $this->ser->on('request', [$this, 'onRequest']);
-//        //处理异步任务的结果
-//        $this->ser->on('task', [$this, 'onTask']);
-//        $this->ser->on('finish', [$this, 'onFinish']);
-//        $this->ser->start();
-//    }
-
-    private function __construct( ){ }
+    private function __construct(){
+    }
 
     public static function getInstance(){
         if(is_null (self::$instance)){
@@ -103,7 +88,7 @@ class Seal
 //        $push = Push::getInstance($ws);
 //        $push->send($frame);
 //        $push->getAllClient();
-        SealKernel::getInstance()->websocket($ws, $frame);
+        Kernel::getInstance()->websocket($ws, $frame);
     }
 
     public function onClose(websocket $ws, $fd)
@@ -127,7 +112,7 @@ class Seal
 
     public function onRequest($request, Response $response)
     {
-        SealKernel::getInstance()->http($this->ser, $request, $response);
+        Kernel::getInstance()->http($this->ser, $request, $response);
     }
 
     public function onFinish($ws, $task_id, $data)

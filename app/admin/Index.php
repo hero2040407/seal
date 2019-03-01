@@ -13,8 +13,13 @@ use seal\Request;
 
 class Index
 {
+//    /admin/index/hello?hello=1
     public function hello(Request $request)
     {
+        echo $request->hello;
+//        go(function () use ($request){
+//            echo $request->hello;
+//        });
 //        $mysql = new \Swoole\Coroutine\MySQL(SWOOLE_SOCK_TCP);
 //        $res = $mysql->connect([
 //            'host' => '127.0.0.1',
@@ -58,8 +63,9 @@ class Index
      * @return array|\PDOStatement|string|\think\Collection
      * @throws
      */
-    public function index()
+    public function index(Request $request, Idea $idea)
     {
-        return (new Idea())->select();
+//        echo $request->hello;
+        return $idea->paginate();
     }
 }
