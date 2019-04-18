@@ -18,7 +18,7 @@ class Loader
 
     public static function autoload($class){
         if($file = self::find($class)){
-            include $file;
+            include_once $file;
             return true;
         }
     }

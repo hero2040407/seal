@@ -1,5 +1,7 @@
 {
     "require": {
-        "topthink/think-orm": "^1.2"
+        "topthink/think-orm": "^1.2",
+        "topthink/think-swoole": "^2.0.16",
+        "pda/pheanstalk": "3.2.1"
     }
 }

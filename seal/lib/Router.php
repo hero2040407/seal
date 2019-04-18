@@ -98,14 +98,14 @@ class Router
         $data = json_decode($data, true);
         if (empty($data)) {
             echo 'WEBSOCKET-json解包错误', PHP_EOL;
-            return ['m' => NULL, 'c' => NULL, 'a' => NULL, 'p' => NULL];
+            return false;
         }
 
         $path = empty($data['cmd']) ? '' : trim($data['cmd'], '/');
 
         if (empty($path)) {
             echo '请求地址错误', PHP_EOL;
-            return ['m' => NULL, 'c' => NULL, 'a' => NULL, 'p' => NULL];
+            return false;
         }
 
         if (!empty(self::$config['rules']) && isset(self::$config['rules'][$path])) {

@@ -5,6 +5,7 @@
  * Date: 2019/1/24
  * Time: 14:55
  */
+
 namespace seal;
 
 
@@ -36,22 +37,23 @@ class Error
      */
     public static function appException($e)
     {
-        Log::getInstance()->write('ERROR', $e->getMessage() . "\r\n",
-            $e->getFile(), $e->getLine());
+        echo 'ERROR: ' . $e->getMessage() . "\r\n";
+        echo "file: " . $e->getFile() . "\n";
+        echo $e->getLine();
     }
 
     /**
      * Error Handler
      * @access public
-     * @param  integer $errno   错误编号
-     * @param  integer $errstr  详细错误信息
-     * @param  string  $errfile 出错的文件
+     * @param  integer $errno 错误编号
+     * @param  integer $errstr 详细错误信息
+     * @param  string $errfile 出错的文件
      * @param  integer $errline 出错行号
      * @throws \ErrorException
      */
     public static function appError($errno, $errstr, $errfile = '', $errline = 0)
     {
-        $exception = new \ErrorException($errno, $errstr, $errfile, $errline);
+        $exception = new \ErrorException($errstr, $errno, 1, $errfile, $errline, null);
         if (error_reporting() & $errno) {
             Log::getInstance()->write('ERROR', $exception->getMessage() . "\r\n",
                 $exception->getFile(), $exception->getLine());
@@ -80,14 +82,13 @@ class Error
     {
         if (!is_null($error = error_get_last()) && self::isFatal($error['type'])) {
             // 将错误信息托管至think\ErrorException
-            $exception = new \ErrorException($error['type'], $error['message'], $error['file'], $error['line']);
+            $exception = new \ErrorException($error['message'], $error['type'], 1, $error['file'], $error['line'], null);
 
             self::appException($exception);
         }
-
         // 写入日志
-        Log::getInstance()->write('ERROR', $exception->getMessage() . "\r\n",
-            $exception->getFile(), $exception->getLine());
+//        Log::getInstance()->write('ERROR', $exception->getMessage() . "\r\n",
+//            $exception->getFile(), $exception->getLine());
     }
 
     /**

@@ -16,6 +16,8 @@ class Kernel
     //实例
     private static $instance;
     private static $map;
+    private static $reflect_map;
+    private static $method_map;
 
     //防止被一些讨厌的小伙伴不停的实例化，自己玩。
     private function __construct()
@@ -90,9 +92,14 @@ class Kernel
         }
     }
 
-    public function websocket($server, $frame)
+    public function websocket(\swoole_websocket_server $server, $frame)
     {
         $router = Router::getInstance()->websocket($frame->data);
+
+        if (!$router) {
+            $server->push($frame->fd, '错误的请求路径');
+            return;
+        }
 
         $app_namespace = Config::getInstance()->get('app.namespace');
         $module = $router['m'];
@@ -129,8 +136,9 @@ class Kernel
 
     /**
      * @param $class
-     * @param $methodname
-     * @throws
+     * @param $method_name
+     * @return mixed
+     * @throws \ReflectionException
      */
     public static function exec($class, $method_name)
     {
@@ -139,18 +147,25 @@ class Kernel
         //通过注入 我们可以实现类对方法和构造方法的依赖。下面我举例说明
         //1.先肯定是从一个类的构造函数开始。
         //2.利用反射得到这个类的构造函数 在执行
-        $reflect = new \ReflectionClass($class);
-        $constructor = $reflect->getConstructor();
-        $p1 = $constructor != null ? self::getParamValue($constructor) : [];
-            //执行被反射类的构造函数 实现构造函数的依赖注入
 
-        $instance = $reflect->newInstanceArgs($p1);
+        if (!isset(self::$reflect_map[$class])) {
+            $reflect = new \ReflectionClass($class);
+            $constructor = $reflect->getConstructor();
+            $p1 = $constructor != null ? self::getParamValue($constructor) : [];
+            //执行被反射类的构造函数 实现构造函数的依赖注入
+            self::$reflect_map[$class] = $reflect->newInstanceArgs($p1);
+        }
+
 
         //执行注入类的方法。
-        $reflect = new \ReflectionMethod($class, $method_name);
-        $p2 = self::getParamValue($reflect);
+        if (!isset(self::$method_map[$class . $method_name])) {
+            self::$method_map[$class . $method_name]  = new \ReflectionMethod($class, $method_name);
+        }
+//        var_dump(self::$method_map);
+
+        $p2 = self::getParamValue(self::$method_map[$class . $method_name]);
         //执行方法注入。
-        return $reflect->invokeArgs($instance, $p2);
+        return self::$method_map[$class . $method_name]->invokeArgs(self::$reflect_map[$class], $p2);
     }
 
     //这个类用来 反射出当前注入类所在的参数。

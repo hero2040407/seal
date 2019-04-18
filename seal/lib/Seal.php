@@ -8,9 +8,9 @@
 
 namespace seal;
 
+use seal\db\Db;
 use Swoole\Http\Response;
 use swoole_websocket_server as websocket;
-use \think\Db;
 
 class Seal
 {
@@ -48,7 +48,7 @@ class Seal
     public function run()
     {
         Push::getInstance();
-        Db::setConfig(Config::getInstance()->get('database'));
+//        Db::setConfig(Config::getInstance()->get('database'));
         $swoole_server = isset($this->config['server']) && $this->config['server'] == 'websocket' ? 'swoole_websocket_server' : 'swoole_http_server';
 
         $this->ser = new $swoole_server($this->config['ip'], $this->config['port']);
@@ -95,11 +95,14 @@ class Seal
     {
         Push::getInstance()->deleteClient($fd);
 //        var_dump(Push::getList());
-        echo "client-{$fd} is closed\n";
+//        echo "client-{$fd} is closed\n";
     }
 
     public function onWorkerStart()
     {
+//        go(function (){
+//            Db::getInstance();
+//        });
         swoole_timer_tick(3000,function ($time_id){
             Log::getInstance()->save();
         });
