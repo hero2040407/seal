@@ -48,18 +48,11 @@ class Log
         if (self::$config['echo']) {
             echo $msg, PHP_EOL;
         }
-//        $this->save($type, $msg);
         self::$logs[$type][] = $msg;
     }
 
     public function save()
     {
-//        if (empty(self::$logs)) return false;
-//        $dir_path = LOG_PATH . date('Ymd') . DIRECTORY_SEPARATOR;
-//        !is_dir($dir_path) && mkdir($dir_path, 0777);
-//        $filename = date("h") . '.' . $type . '.log';
-//        swoole_async_writefile($dir_path . $filename, $msg . "\r\n", NULL, FILE_APPEND);
-//        return true;
         if (empty(self::$logs)) return false;
         foreach (self::$logs as $type => $logs) {
             $dir_path = LOG_PATH . date('Ymd') . DIRECTORY_SEPARATOR;

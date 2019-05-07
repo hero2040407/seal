@@ -8,23 +8,20 @@
 namespace app\admin;
 
 use app\admin\model\Idea;
-use app\admin\service\Beanstalk;
+use app\admin\model\Menu;
 use seal\db\Db;
 use seal\exception\ResultException;
 use seal\Push;
 use seal\Request;
-use Swoole\Coroutine;
-use Swoole\Coroutine\MySQL;
 
 class Index
 {
 //    /admin/index/hello?hello=1
-    public function hello(Request $request)
+    public function hello(Db $db, Request $request)
     {
-        $db = Db::getInstance();
-        $mysql = $db->getConnection();
-        $res = $mysql->query("select * from pro_menu where id=2");
-        $db->close($mysql);
+
+        $res = $db->table('pro_menu')->order('id desc')
+            ->where('id<24 and id>5')->select();
         return $res;
 //        $db->close($mysql);
 //        $res = $mysql->connect([
@@ -69,10 +66,16 @@ class Index
      * @return array|\PDOStatement|string|\think\Collection
      * @throws
      */
-    public function index(Request $request)
+    public function index()
     {
+        $res = Menu::get(2);
+        $res['name'] = '这个世界';
+        $res['update_time'] = 1558595858;
+        unset($res['id']);
+
 //        echo 123;
 //        echo $request->hello;
 //        return $idea->paginate();
+        return $res;
     }
 }

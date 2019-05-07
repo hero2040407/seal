@@ -15,7 +15,9 @@ return [
     // 用户名
     'user'        => 'root',
     // 数据库名
-    'database'        => 'menu',
+    'database'    => 'menu',
     // 密码
-    'password'        => '31102210',
+    'password'    => '31102210',
+
+    'prefix'      => 'pro_'
 ];

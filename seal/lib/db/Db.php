@@ -12,13 +12,14 @@ use Swoole\Coroutine\Channel;
 
 class Db
 {
+    use \seal\db\drive\Mysql;
+
     private $chan;
     private static $instance;
 
     public function __construct($size)
     {
         $this->chan = new Channel($size);
-        $this->generateConnections($size);
     }
 
     public static function getInstance()
@@ -40,7 +41,13 @@ class Db
 
     public function getConnection() :Mysql
     {
-        return $this->chan->pop();
+        $mysql = $this->chan->pop(0.001);
+        if (!$mysql) {
+            $mysql = new Mysql();
+            $mysql->connect(\seal\Config::getInstance()->get('database'));
+        }
+
+        return $mysql;
     }
 
     public function close($mysql)
@@ -51,5 +58,29 @@ class Db
     public function getPoolLength()
     {
         return $this->chan->length();
+    }
+
+    public function setConnection()
+    {
+        $mysql = new Mysql();
+        $mysql->connect(\seal\Config::getInstance()->get('database'));
+        $this->chan->push($mysql);
+    }
+
+    public function achieve()
+    {
+        $mysql = $this->getConnection();
+        try {
+            $arr = $mysql->query($this->sql);
+            if ($arr === false)
+            {
+                var_dump($mysql->errno, $mysql->error);
+            }
+            $this->close($mysql);
+            return $arr;
+        } catch (\Exception $e) {
+            $this->setConnection();
+            return $this->achieve();
+        }
     }
 }

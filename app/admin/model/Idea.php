@@ -1,7 +1,8 @@
 <?php
 namespace app\admin\model;
 
-use think\Model;
+
+use seal\db\mysql\Model;
 
 class Idea extends Model
 {
