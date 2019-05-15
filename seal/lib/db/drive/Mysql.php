@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by IntelliJ IDEA.
- * User: alex
+ * UserModel: alex
  * Date: 2019/3/29
  * Time: 下午1:52
  */
@@ -74,7 +74,7 @@ trait Mysql
             $this->sql = $this->sql . $this->where;
         }
         $this->sql .= ' limit 1';
-        return $this->achieve();
+        return !empty($this->achieve()) ? $this->achieve()[0] : false;
     }
 
     /**

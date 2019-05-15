@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: LENOVO
+ * UserModel: LENOVO
  * Date: 2019/1/16
  * Time: 11:11
  */
@@ -29,6 +29,59 @@ class Request
     private $tmpfiles;
     private $rawContent;
     private $getData;
+    private $module;
+    private $controller;
+    private $action;
+
+    /**
+     * @return mixed
+     */
+    public function getModule()
+    {
+        return $this->module;
+    }
+
+    /**
+     * @param mixed $module
+     */
+    public function setModule($module): void
+    {
+        $this->module = $module;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getController()
+    {
+        return $this->controller;
+    }
+
+    /**
+     * @param mixed $controller
+     */
+    public function setController($controller): void
+    {
+        $this->controller = $controller;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAction()
+    {
+        return $this->action;
+    }
+
+    /**
+     * @param mixed $action
+     */
+    public function setAction($action): void
+    {
+        $this->action = $action;
+    }
+
+
 
     private function __construct()
     {
@@ -43,7 +96,7 @@ class Request
     }
 
     //先拿到$request，然后挨个给它变身
-    public function set($request)
+    public function set($request, $router)
     {
         $this->server = $request->server;
         $this->header = $request->header;
@@ -55,7 +108,17 @@ class Request
         $this->post = $request->post ?? [];
         $this->rawContent = $request->rawContent();
         $this->getData = $request->getData();
-        $param = array_merge($this->get, $this->post);
+        $this->module = $router['module'];
+        $this->controller = $router['controller'];
+        $this->action = $router['action'];
+
+        if ($this->rawContent) {
+            $param = array_merge($this->get, $this->post, $this->rawContent);
+        }
+        else
+            $param = array_merge($this->get, $this->post);
+
+
         foreach ($param as $key => $value) {
             $this->$key = $value;
         }

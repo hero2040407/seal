@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: LENOVO
+ * UserModel: LENOVO
  * Date: 2019/1/16
  * Time: 10:56
  */
@@ -45,24 +45,32 @@ class Kernel
     {
         try {
             if ($request->server['request_uri'] == '/favicon.ico') return;
+            $router = Router::getInstance()->http($request->server['request_uri']);
             $req = Request::getInstance();
-            $req->set($request);
-            $router = Router::getInstance()->http($req->server['request_uri']);
+            $req->set($request, $router);
 
             $app_namespace = Config::getInstance()->get('app.namespace');
             $module = $router['module'];
             $controller = ucfirst($router['controller']);
             $action = $router['action'];
-            $param = $router['param'];
-            $classname = "\\{$app_namespace}\\{$module}\\{$controller}";
+//            $param = $router['param'];
+            $classname = "\\{$app_namespace}\\{$module}\\controller\\{$controller}";
 
             if (!isset(self::$map[$classname])) {
-                $class = new $classname;
-                self::$map[$classname] = $class;
+                self::$map[$classname] = new $classname;
+            }
+            $class = self::$map[$classname];
+
+            if (!empty($class->getBeforeAction())) {
+                foreach ($class->getBeforeAction() as $method => $options) {
+                    is_numeric($method) ?
+                        $class->beforeAction($method) :
+                        $class->beforeAction($method, $options);
+                }
             }
 
-            self::$map[$classname]->server = $server;
-            self::$map[$classname]->task = Task::getInstance()->setServer($server);
+            $class->server = $server;
+            $class->task = Task::getInstance()->setServer($server);
 
             //测试效果
             $content = self::exec($classname, $action);

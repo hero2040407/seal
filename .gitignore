@@ -3,3 +3,5 @@
 /logs
 /vendor
 /test
+/composer.phar
+/seal.iml

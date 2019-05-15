@@ -1,27 +1,26 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: LENOVO
+ * UserModel: LENOVO
  * Date: 2019/1/16
  * Time: 12:11
  */
-namespace app\admin;
+namespace app\admin\controller;
 
-use app\admin\model\Idea;
-use app\admin\model\Menu;
 use seal\db\Db;
 use seal\exception\ResultException;
 use seal\Push;
 use seal\Request;
 
-class Index
+class Index extends Base
 {
-//    /admin/index/hello?hello=1
+    protected $beforeAction = ['before' => ['index']];
+
     public function hello(Db $db, Request $request)
     {
 
         $res = $db->table('pro_menu')->order('id desc')
-            ->where('id<24 and id>5')->select();
+            ->where('id>5')->select();
         return $res;
 //        $db->close($mysql);
 //        $res = $mysql->connect([
@@ -66,16 +65,13 @@ class Index
      * @return array|\PDOStatement|string|\think\Collection
      * @throws
      */
-    public function index()
+    public function index(Request $request)
     {
-        $res = Menu::get(2);
-        $res['name'] = '这个世界';
-        $res['update_time'] = 1558595858;
-        unset($res['id']);
+        var_dump($request->getController());
+    }
 
-//        echo 123;
-//        echo $request->hello;
-//        return $idea->paginate();
-        return $res;
+    public function before()
+    {
+        echo 'this is beforeAction';
     }
 }

@@ -1,13 +1,13 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: LENOVO
+ * UserModel: LENOVO
  * Date: 2019/1/16
  * Time: 12:03
  */
 return [
     //项目名称
-    'name' => 'seal',
+    'name' => 'find',
     //项目命名空间
     'namespace' => 'app',
     //项目所在路径
@@ -22,13 +22,13 @@ return [
 
     //配置参数  请查看  https://wiki.swoole.com/wiki/page/274.html
     'set' => [
-        'daemonize' => false,
+        'daemonize' => true,
         'enable_static_handler' => false,
         'task_enable_coroutine' => false,
         'document_root' => realpath(__DIR__ . '/../static/'),
-        'worker_num' => 4,
+        'worker_num' => 2,
         'max_request' => 100000,
-        'task_worker_num' => 4,
+        'task_worker_num' => 2,
     ],
 
     'log' => [
