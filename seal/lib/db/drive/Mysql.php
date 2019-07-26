@@ -9,6 +9,8 @@ namespace seal\db\drive;
 
 
 
+use seal\Request;
+
 trait Mysql
 {
 
@@ -105,6 +107,24 @@ trait Mysql
             $build[] = "$key=$value";
         }
         $this->sql   .=  implode(',', $build) . $this->where;
+        return $this->achieve();
+    }
+
+    public function paginate($row_num = 10)
+    {
+        $page = Request::getInstance()->page ?? 0;
+        $this->sql = 'select '.
+            $this->field.
+            ' from '.
+            $this->table;
+        if ($this->where) {
+            $this->sql .= $this->where;
+        }
+        if ($this->order) {
+            $this->sql .= $this->order;
+        }
+        $this->sql .= ' limit '. $page * $row_num .",$row_num";
+        var_dump($this->sql);
         return $this->achieve();
     }
 }

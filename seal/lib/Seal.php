@@ -92,7 +92,6 @@ class Seal
 //        echo "Message: {$frame->data}\n";
 //        var_dump($frame->data);
 //        $push = Push::getInstance($ws);
-//        $push->send($frame);
 //        $push->getAllClient();
         Kernel::getInstance()->websocket($ws, $frame);
     }
@@ -100,7 +99,7 @@ class Seal
     public function onClose(websocket $ws, $fd)
     {
         Push::getInstance()->deleteClient($fd);
-//        var_dump(Push::getList());
+//        var_dump(Push::getInstance()->count());
 //        echo "client-{$fd} is closed\n";
     }
 
@@ -127,9 +126,9 @@ class Seal
         });
     }
 
-    public function onTask(websocket $ws, $task_id, $from_id, $data)
+    public function onTask(websocket $ws, $task)
     {
-        return Task::getInstance()->setServer($ws)->dispatch($task_id, $from_id, $data);
+        return Task::getInstance()->setServer($ws)->dispatch($task->id, $task->worker_id, $task->data);
     }
 
     public function onRequest($request, Response $response)

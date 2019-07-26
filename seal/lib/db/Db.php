@@ -72,10 +72,7 @@ class Db
         $mysql = $this->getConnection();
         try {
             $arr = $mysql->query($this->sql);
-            if ($arr === false)
-            {
-                var_dump($mysql->errno, $mysql->error);
-            }
+            echo $mysql->error;
             $this->close($mysql);
             return $arr;
         } catch (\Exception $e) {

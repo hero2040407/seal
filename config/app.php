@@ -22,13 +22,14 @@ return [
 
     //配置参数  请查看  https://wiki.swoole.com/wiki/page/274.html
     'set' => [
-        'daemonize' => true,
+        'daemonize' => false,
         'enable_static_handler' => false,
-        'task_enable_coroutine' => false,
-        'document_root' => realpath(__DIR__ . '/../static/'),
+        'task_enable_coroutine' => true,
+//        'document_root' => realpath(__DIR__ . '/../static/'),
         'worker_num' => 2,
         'max_request' => 100000,
         'task_worker_num' => 2,
+        'heartbeat_check_interval' => 60,
     ],
 
     'log' => [

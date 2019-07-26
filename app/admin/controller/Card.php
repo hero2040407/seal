@@ -10,6 +10,7 @@ namespace app\admin\controller;
 
 
 use app\admin\model\CardModel;
+use app\admin\model\FormModel;
 use app\admin\model\UserModel;
 use seal\exception\ResultException;
 use seal\Request;
@@ -41,16 +42,28 @@ class Card extends Base
         return $this->success();
     }
 
-    public function read(CardModel $cardModel, Request $request)
+    public function index(CardModel $cardModel, Request $request)
     {
-        $res = $cardModel->getDb()->where('card_no=' . $request->card_no)->find();
+        $res = $cardModel->getDb()->where('card_no=' . $request->card_no)->select();
         if (!$res)
             throw new ResultException([
                 'msg' => '证件号码不存在'
             ]);
 
-        $user = UserModel::get($res['uid']);
-        $data['mobile'] = $res[''];
+        return $this->success($res);
+    }
+
+    public function update(CardModel $cardModel, Request $request)
+    {
+        $cardModel->id = $request->id;
+        $cardModel->card_no = $request->card_no;
+        $cardModel->update();
         return $this->success();
+    }
+
+    public function test(FormModel $formModel)
+    {
+        $data = $formModel->getDb()->paginate();
+        return $this->success($data);
     }
 }

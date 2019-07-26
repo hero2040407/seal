@@ -69,11 +69,8 @@ class Kernel
                 }
             }
 
-            $class->server = $server;
-            $class->task = Task::getInstance()->setServer($server);
-
             //测试效果
-            $content = self::exec($classname, $action);
+            $content = self::exec($classname, $action, $server);
             $response->header('Content-type', 'application/json');
             $response->end(json_encode($content, true));
         } catch (\Exception $e) {      //在此处返回 404错误的原因是因为加载器已经在查找不到文件时有说错误说明
@@ -102,6 +99,11 @@ class Kernel
 
     public function websocket(\swoole_websocket_server $server, $frame)
     {
+        if ($frame->data == 'ping') {
+            $server->push($frame->fd, 'pong');
+            return;
+        }
+
         $router = Router::getInstance()->websocket($frame->data);
 
         if (!$router) {
@@ -145,10 +147,11 @@ class Kernel
     /**
      * @param $class
      * @param $method_name
+     * @param $server
      * @return mixed
      * @throws \ReflectionException
      */
-    public static function exec($class, $method_name)
+    public static function exec($class, $method_name, $server)
     {
         //注入的实质是通过php的反射类 来执行被注入类的行为
         //通过反射 可以得到类的一些信息 主要包括方法 属性
@@ -160,8 +163,11 @@ class Kernel
             $reflect = new \ReflectionClass($class);
             $constructor = $reflect->getConstructor();
             $p1 = $constructor != null ? self::getParamValue($constructor) : [];
+            $class_model = $reflect->newInstanceArgs($p1);
+            $class_model->server = $server;
+            $class_model->task = Task::getInstance()->setServer($server);
             //执行被反射类的构造函数 实现构造函数的依赖注入
-            self::$reflect_map[$class] = $reflect->newInstanceArgs($p1);
+            self::$reflect_map[$class] = $class_model;
         }
 
 

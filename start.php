@@ -10,6 +10,6 @@ define("APP_ROOT",dirname(__FILE__));
 
 require "seal/base.php";
 require "common.php";
-//require 'vendor/autoload.php';
+require 'vendor/autoload.php';
 
 start::run(isset($argv[1]) ? $argv[1] : '');

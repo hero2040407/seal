@@ -19,7 +19,7 @@ class Router
         'module' => 'index',     //默认模块
         'controller' => 'index',     //默认控制器
         'action' => 'index',     //默认操作
-        'ext' => '.html',          //url后缀    例如 .html
+        'ext' => '.htm',          //url后缀    例如 .html
         'rules' => [           //自定义路由
             'user' => 'user/index/init',
             'login' => 'index/login/init',
@@ -59,7 +59,7 @@ class Router
 
         $path = trim($request_uri, '/');
         if (!empty(self::$config['ext'])) {
-            $path = rtrim($path, self::$config['ext']);
+            $path = preg_replace('/'.self::$config['ext'].'/','', $path);
         }
 
         if (!empty(self::$config['rules'])) {
@@ -97,7 +97,7 @@ class Router
     {
         $data = json_decode($data, true);
         if (empty($data)) {
-            echo 'WEBSOCKET-json解包错误', PHP_EOL;
+//            echo 'WEBSOCKET-json解包错误', PHP_EOL;
             return false;
         }
 

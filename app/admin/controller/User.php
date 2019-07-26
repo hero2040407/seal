@@ -16,6 +16,12 @@ class User extends Base
 {
     protected $beforeAction = ['isLogin' => ['update']];
 
+    public function read(Request $request)
+    {
+        $user = UserModel::get($request->uid);
+        return $this->success($user);
+    }
+
     public function update(UserModel $user, Request $request)
     {
         $arr = ['mobile', 'resume'];

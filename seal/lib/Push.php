@@ -38,4 +38,14 @@ class Push extends \swoole_table
             }
         }
     }
+
+    public function getAllFds()
+    {
+        $fds = [];
+        foreach($this as $item)
+        {
+            $fds[] = $item['fd'];
+        }
+        return $fds;
+    }
 }

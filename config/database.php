@@ -17,7 +17,7 @@ return [
     // 数据库名
     'database'    => 'find',
     // 密码
-    'password'    => 'sos330635641',
+    'password'    => '31102210',
 
     'prefix'      => 'pro_'
 ];

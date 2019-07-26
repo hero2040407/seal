@@ -7,6 +7,7 @@
  */
 namespace app\admin\controller;
 
+use app\admin\model\FormModel;
 use seal\db\Db;
 use seal\exception\ResultException;
 use seal\Push;
@@ -60,6 +61,22 @@ class Index extends Base
         $this->task->delivery(\app\task\Notice::class,'toSingle',[$fd['fd'], $content]);
     }
 
+    public function sendToAll(Request $request)
+    {
+        $fd = Push::getInstance()->get($request->uid);
+        $content = "FD:{$fd['fd']};say:{$request->message}";
+        $this->task->delivery(\app\task\Notice::class,'toAll',[$fd['fd'], $content]);
+    }
+
+    public function notify()
+    {
+        $fds = Push::getInstance()->getAllFds();
+        $content = 123321123;
+        $this->task->delivery(\app\task\Notice::class,'notify',[$fds, $content]);
+//        echo count($this->server->connections);
+        return $this->success($fds);
+    }
+
     /**
      * @param Idea $idea
      * @return array|\PDOStatement|string|\think\Collection
@@ -67,11 +84,20 @@ class Index extends Base
      */
     public function index(Request $request)
     {
-        var_dump($request->getController());
+
     }
 
     public function before()
     {
-        echo 'this is beforeAction';
+        return 'this is beforeAction';
+    }
+
+    public function getFormIndex(FormModel $formModel)
+    {
+        go(function () use ($formModel){
+            $formModel->name = 123;
+            $formModel->create();
+        });
+        return $this->success();
     }
 }

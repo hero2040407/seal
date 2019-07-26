@@ -4,6 +4,7 @@
  */
 
 namespace app\task;
+
 class Notice
 {
     /**
@@ -23,6 +24,15 @@ class Notice
             }
         }
         return "已向[" . join(",", $fds) . "]发送通知内容：" . $data;
+    }
+
+    public function notify($fds, $data)
+    {
+        foreach ($fds as $fd) {
+            if ($this->server->exist($fd)) {
+                $this->server->push($fd, $data);
+            }
+        }
     }
 
     public function toSeveral($data)

@@ -5,6 +5,8 @@
 
 namespace seal;
 
+use Swoole\Coroutine;
+
 class Log
 {
     /**
@@ -54,16 +56,20 @@ class Log
     public function save()
     {
         if (empty(self::$logs)) return false;
+        $dir_path = LOG_PATH . 'daily' . DIRECTORY_SEPARATOR;
+        !is_dir($dir_path) && mkdir($dir_path, 0777);
+        $filename = date('md')  . '.log';
+        $log_content = '';
         foreach (self::$logs as $type => $logs) {
-            $dir_path = LOG_PATH . date('Ymd') . DIRECTORY_SEPARATOR;
-            !is_dir($dir_path) && mkdir($dir_path, 0777);
-            $filename = date("h")  . '.log';
+//            $dir_path = LOG_PATH . date('Ymd') . DIRECTORY_SEPARATOR;
+
             $content = NULL;
             foreach ($logs as $log) {
-                $content .= $log . PHP_EOL;
+                $content .= $log . PHP_EOL . "\n";
             }
-            swoole_async_writefile($dir_path . $filename, $content . "\r\n", NULL, FILE_APPEND);
+            $log_content = $log_content.$content . "\r\n";
         }
+        Coroutine::writeFile($dir_path . $filename, $log_content,FILE_APPEND);
         self::$logs = [];
         return true;
     }

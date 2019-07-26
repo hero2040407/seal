@@ -112,13 +112,14 @@ class Request
         $this->controller = $router['controller'];
         $this->action = $router['action'];
 
-        if ($this->rawContent) {
-            $param = array_merge($this->get, $this->post, $this->rawContent);
+        $raw_content = json_decode($this->rawContent, true);
+        if (is_array($raw_content)) {
+            $param = array_merge($this->get, $this->post, $raw_content);
         }
         else
             $param = array_merge($this->get, $this->post);
 
-
+        unset($raw_content);
         foreach ($param as $key => $value) {
             $this->$key = $value;
         }
@@ -132,6 +133,7 @@ class Request
     //变身后它就不是废物了，那就得让小伙伴们能使用它，这里使用了这么一个魔术方法。
     public function __get($name)
     {
+        if (isset($this->$name))
         return $this->$name;
     }
 

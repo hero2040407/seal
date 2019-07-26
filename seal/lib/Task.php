@@ -43,7 +43,7 @@ final class Task
     final public function delivery($class, $func, $params = [])
     {
         $task_id = $this->server->task([$class, $func, $params]);
-        echo "投递任务", "\t", "TaskID:{$task_id},", "Class:{$class}", "Func:{$func}", "Params:" . join(",", $params), PHP_EOL;
+        echo "投递任务", "\t", "TaskID:{$task_id},", "Class:{$class}", "Func:{$func}", "Params:", PHP_EOL;
         return $task_id;
     }
 
