@@ -8,6 +8,7 @@
 namespace app\admin\controller;
 
 use app\admin\model\FormModel;
+use app\rpc\RpcService;
 use seal\db\Db;
 use seal\exception\ResultException;
 use seal\Push;
@@ -92,12 +93,29 @@ class Index extends Base
         return 'this is beforeAction';
     }
 
-    public function getFormIndex(FormModel $formModel)
+    public function insertForm(FormModel $formModel)
     {
         go(function () use ($formModel){
-            $formModel->name = 123;
+        $data[] = [
+            'name' => 123,
+            'create_time' => time()
+        ];
+        $data[] = [
+            'name' => 123,
+            'create_time' => time()
+        ];
+        $data[] = [
+            'name' => 123,
+            'create_time' => time()
+        ];
+            $formModel->getDb()->insertAll($data);
             $formModel->create();
         });
         return $this->success();
+    }
+
+    public function rpc(RpcService $rpcService)
+    {
+        $rpcService->startClient();
     }
 }

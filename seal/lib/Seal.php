@@ -8,7 +8,7 @@
 
 namespace seal;
 
-use seal\db\Db;
+use app\rpc\test\UserService;
 use Swoole\Http\Response;
 use swoole_websocket_server as websocket;
 
@@ -54,6 +54,10 @@ class Seal
     public function run()
     {
         Push::getInstance();
+        $rpcSeal = RpcSeal::getInstance();
+        $rpcSeal->config();
+        $rpcSeal->rpc()->add(new UserService());
+        $rpcSeal->generate();
 //        Db::setConfig(Config::getInstance()->get('database'));
         $swoole_server = isset($this->config['server']) && $this->config['server'] == 'websocket' ? 'swoole_websocket_server' : 'swoole_http_server';
 

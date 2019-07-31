@@ -11,12 +11,14 @@ namespace seal\db\mysql;
 
 use seal\Config;
 use seal\db\Db;
+use seal\Request;
 
 class Model
 {
 
     protected $autoTime = false;
     protected $updateTime = false;
+    private $data;
 
     public function __construct()
     {
@@ -30,24 +32,27 @@ class Model
 
     public static function get($id)
     {
+        $module = Request::getInstance()->getModule();
         $table = static::toUnderScore(basename(str_replace('\\', '/', static::class)));
         $id = is_string($id) ? "'" . $id ."'" : $id;
         return Db::getInstance()->table(Config::getInstance()
-                ->get('database.prefix') . $table)
+                ->get('database.'.$module.'.prefix') . $table)
             ->where('id=' . $id)->find();
     }
 
     public function create()
     {
+        $module = Request::getInstance()->getModule();
         $table = static::toUnderScore(basename(str_replace('\\', '/', static::class)));
         if ($this->autoTime) {
             $this->data['create_time'] = time();
             if ($this->updateTime)
                 $this->data['update_time'] = time();
         }
-        return Db::getInstance()->table(Config::getInstance()
-                ->get('database.prefix') . $table)
-                ->insert($this->data);
+        $db = Db::getInstance()->table(Config::getInstance()
+                ->get('database.'.$module.'.prefix') . $table);
+
+        $this->id = $db->insert($this->data);
     }
 
     public function update()
@@ -63,9 +68,10 @@ class Model
 
     public function getDb() :Db
     {
+        $module = Request::getInstance()->getModule();
         $table = static::toUnderScore(basename(str_replace('\\', '/', static::class)));
         return Db::getInstance()->table(Config::getInstance()
-                ->get('database.prefix') . $table);
+                ->get('database.'.$module.'.prefix') . $table);
     }
 
     protected static function toUnderScore($str)
@@ -80,6 +86,11 @@ class Model
     public function __set($name, $value)
     {
         $this->data[$name] = $value;
+    }
+
+    public function __get($name)
+    {
+        return $this->data[$name];
     }
 
     private function exchangeId($value)

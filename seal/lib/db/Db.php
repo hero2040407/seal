@@ -5,79 +5,37 @@
  * Date: 2019/3/28
  * Time: 下午3:00
  */
-namespace seal\db;
 
-use Swoole\Coroutine\Mysql;
-use Swoole\Coroutine\Channel;
+namespace seal\db;
 
 class Db
 {
     use \seal\db\drive\Mysql;
 
-    private $chan;
-    private static $instance;
-
-    public function __construct($size)
-    {
-        $this->chan = new Channel($size);
-    }
+    public $connection;
 
     public static function getInstance()
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new static(100);
-        }
-        return self::$instance;
-    }
-
-    public function generateConnections($size)
-    {
-        for ($i = 0; $i < $size; $i++) {
-            $mysql = new Mysql();
-            $mysql->connect(\seal\Config::getInstance()->get('database'));
-            $this->chan->push($mysql);
-        }
-    }
-
-    public function getConnection() :Mysql
-    {
-        $mysql = $this->chan->pop(0.001);
-        if (!$mysql) {
-            $mysql = new Mysql();
-            $mysql->connect(\seal\Config::getInstance()->get('database'));
-        }
-
-        return $mysql;
-    }
-
-    public function close($mysql)
-    {
-        $this->chan->push($mysql);
-    }
-
-    public function getPoolLength()
-    {
-        return $this->chan->length();
-    }
-
-    public function setConnection()
-    {
-        $mysql = new Mysql();
-        $mysql->connect(\seal\Config::getInstance()->get('database'));
-        $this->chan->push($mysql);
+        $db = new self();
+        $db->connection = MysqlPool::getInstance()->getConnection();
+        return $db;
     }
 
     public function achieve()
     {
-        $mysql = $this->getConnection();
         try {
-            $arr = $mysql->query($this->sql);
-            echo $mysql->error;
-            $this->close($mysql);
+            $arr = $this->connection->query($this->sql);
+            echo $this->connection->error;
+            $this->clear();
             return $arr;
         } catch (\Exception $e) {
-            $this->setConnection();
+            $this->connection = MysqlPool::getInstance()->getConnection();
             return $this->achieve();
         }
+    }
+
+    public function close()
+    {
+        MysqlPool::getInstance()->close($this);
     }
 }

@@ -38,7 +38,10 @@ class Request
      */
     public function getModule()
     {
-        return $this->module;
+        if ($this->module)
+            return $this->module;
+        else
+            return 'rpc';
     }
 
     /**

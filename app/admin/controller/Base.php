@@ -9,34 +9,13 @@
 namespace app\admin\controller;
 
 
+use seal\Controller;
 use seal\exception\ResultException;
 use seal\Request;
 
-class Base
+class Base extends Controller
 {
     protected $userToken;
-    protected $beforeAction = [];
-
-    public function beforeAction($method, $options = [])
-    {
-        if (empty($options)) {
-            call_user_func([$this, $method]);
-        }
-        else {
-            $action = Request::getInstance()->getAction();
-            if (in_array($action, $options)) {
-                call_user_func([$this, $method]);
-            }
-        }
-    }
-
-    /**
-     * @return array
-     */
-    public function getBeforeAction(): array
-    {
-        return $this->beforeAction;
-    }
 
     public function success($data = '')
     {

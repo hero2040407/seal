@@ -5,3 +5,9 @@
 /test
 /composer.phar
 /seal.iml
+/app/admin/.DS_Store
+/app/.DS_Store
+/seal/lib/.DS_Store
+/seal/lib/db/.DS_Store
+/seal/seal.iml
+/.DS_Store
